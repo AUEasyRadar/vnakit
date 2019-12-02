@@ -17,6 +17,13 @@
             "request": "launch",
             "program": "C:\\Users\\tucke\\OneDrive\\Documents\\Fall 2019\\Senior Design\\Main\\Main.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: UI_Test.py",
+            "type": "python",
+            "request": "launch",
+            "program": "C:\\Users\\tucke\\OneDrive\\Documents\\Fall 2019\\Senior Design\\Main\\GUI\\UI_Test.py",
+            "console": "integratedTerminal"
         }
     ]
 }

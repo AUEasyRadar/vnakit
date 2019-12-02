@@ -11,7 +11,7 @@ class MotorCont:
 		self.parent = parent
 		#
 		ttk.Label(parent, text='Motor Control:').grid(column = 0, row = (2*(number-1)), sticky = (N,S,E))
-		self.xSlider = Scale(parent, from_=0, to=10,orient=VERTICLE)
+		self.xSlider = Scale(parent, from_=0, to=10,orient=VERTICAL)
 		self.xSlider.grid(column = 4, row = 1)
 
 		self.ySlider = Scale(parent, from_=0, to=10,orient=HORIZONTAL)
