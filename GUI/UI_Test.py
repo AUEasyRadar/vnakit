@@ -16,7 +16,7 @@ from LivePlot import LivePlot
 from MotorTab import MotorCont
 #from DataTab import DataGather
 #from PlotTab import DataPlot
-from RadarTab import RadarPlot
+#from RadarTab import RadarPlot
 
 VER_NUMBER = '0.1'
 #configurationSettings
@@ -246,6 +246,43 @@ def DataGather(parent, number, msg = '???'):
     saveLocationButton = ttk.Button(parent, text = "Browse", command = browseToFolder)
     saveLocationButton.grid(column = 3, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 5)
 
+def RadarPlot(parent, number, msg = '???'):
+
+    def startRadar():
+
+        print('Radar has started')
+        print('S plots have stopped')
+
+    def updateAngle():
+
+        parent.angleBox.insert(0,32)
+
+    def updateRange():
+
+        rangeBox.insert(0,2)
+
+    ttk.Label(parent, text='Radar Plot:').grid(column = 0, row = (2*(number-1)), sticky = (N,S,E))
+    f = Figure(figsize = (4,4), dpi = 100, tight_layout = 'true')
+    f.add_axes([0.1, 0.1, 0.8, 0.8],projection='polar')
+    canvas = FigureCanvasTkAgg(f, parent)
+    canvas.get_tk_widget().grid(column=0, row=1, sticky =(N,S,E,W), columnspan=2, rowspan = 2)
+    ttk.Label(parent, text='Radar Angle').grid(column = 5, row = 0, columnspan = 7, sticky = N)
+    ttk.Label(parent, text=' Radar Distance').grid(column = 5, row = 2, columnspan = 7, sticky = N)
+    #call to grid function for GUI placement
+
+    angleBox = ttk.Entry(parent,validate = 'focusout', validatecommand = updateAngle)
+    angleBox.grid(column = 6, row = 1, columnspan = 6)
+
+    rangeBox = ttk.Entry(parent,validate = 'focusout', validatecommand = updateRange)
+    rangeBox.grid(column = 6, row = 2, columnspan = 6)
+
+    dataGather = ttk.Button(parent, text = 'Begin Radar', command = startRadar)
+    dataGather.grid(column = 0, row = 3, columnspan = 6, sticky = (W), padx = 10, pady = 10)
+
+    dataStop = ttk.Button(parent, text = 'Stop Radar', command = startRadar)
+    dataStop.grid(column = 0, row = 3, columnspan = 6, sticky = (E), padx = 10, pady = 10)
+
+
 def connectButton():
     print("Connect Button Pressed")
     #vnakit.Init()
@@ -303,7 +340,7 @@ DataPlot(ManualPlt_frame, 1, 'Manual Plot')
 #Data Gather Tab
 DataGather(Data_frame, 1, 'Manual Data')
 #Radar Tab
-RADPLT = RadarPlot(Radar_frame, 1, 'Radar Data')
+RadarPlot(Radar_frame, 1, 'Radar Data')
 #create frames for ADC graphing and csv logging
 Plot_frame = ttk.Frame(root, padding = (10,5))
 Plot_frame.rowconfigure(0, weight = 1)
