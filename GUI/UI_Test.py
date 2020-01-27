@@ -21,11 +21,12 @@ from MotorTab import MotorCont
 VER_NUMBER = '0.1'
 #configurationSettings
 
-def Startup(parent, number, msg = '???'):
 
+def Startup(parent, number, msg = '???'):
+    """Populates the Setup tab of the GUI"""
     
     def configureButtonPress():
-
+        """Operates the setup button"""
         print('Button Was Pressed')
         print(parent.freqEntry.get(),'MHz')
         print(parent.powerEntry.get(),'dBm')
@@ -52,6 +53,9 @@ def Startup(parent, number, msg = '???'):
         parent.configMsg['foreground'] = 'green'
 
     def freqStringValidate():
+        """Validates the input string of the frequency box and changes the
+        status indicator to not configured
+        """
         freq = int(float(parent.freqEntry.get()))
         if freq > 6000:
             freq = 6000
@@ -66,11 +70,11 @@ def Startup(parent, number, msg = '???'):
         parent.freqEntry.delete(0,'end')
         parent.freqEntry.insert(0,str(freq))
         return 1
-    def powerLevelChange(newVal):
+    def powerLevelChange():
+        """Changes the status indicator to not configured"""
         parent.configured = 'not configured'
         parent.configMsg['text'] = configured
         parent.configMsg['foreground'] = 'red'
-        power = int(parent.powerEntry.get()) 
 
     #parent.number = number
     #parent.parent = parent
@@ -118,9 +122,12 @@ def Startup(parent, number, msg = '???'):
     parent.columnconfigure(6, weight = 0)
 
 def DataPlot(parent, number, msg = '???'):
+    """Populates the Manual Plot tab of the GUI"""
     def browseToFile():
+        """Return the file's path"""
         print("Browsing to file")
     def toggleButtonState():
+        """Controls the usability of the browse button"""
         if actualOrLoad.get() == 0:
             browseButton['state'] = 'disabled'
         
@@ -194,9 +201,9 @@ def DataPlot(parent, number, msg = '???'):
     ttk.OptionMenu(parent, timeOptionsSelect, *timeOptions).grid(column = 2, row = (2*(number + 13)), sticky = (W), pady = 10)
 
 def DataGather(parent, number, msg = '???'):
-    number = number
-    parent = parent
+    """Populates the Manual Gather tab of the GUI"""
     def browseToFolder():
+        """Sets the save file path"""
         print("Browsing to folder")
     #x-axis
     ttk.Label(parent, text='x-Axis:').grid(column = 0, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
@@ -247,9 +254,9 @@ def DataGather(parent, number, msg = '???'):
     saveLocationButton.grid(column = 3, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 5)
 
 def RadarPlot(parent, number, msg = '???'):
-
+    """Populates the Radar Tab"""
     def startRadar():
-
+        """Will eventually start radar plotting"""
         print('Radar has started')
         print('S plots have stopped')
 
@@ -282,13 +289,22 @@ def RadarPlot(parent, number, msg = '???'):
     dataStop = ttk.Button(parent, text = 'Stop Radar', command = startRadar)
     dataStop.grid(column = 0, row = 3, columnspan = 6, sticky = (E), padx = 10, pady = 10)
 
-
 def connectButton():
+    """Connects to the vnakit"""
     print("Connect Button Pressed")
     #vnakit.Init()
     connected = "Connected"
     root.connectBtn.configure(text = connected, bg = 'green')
     # Add error trapping if vnakit.Init() fails
+
+def plotFile(filePath):
+    """Returns no value
+    Takes the input file from the calling function
+    Uses the input file and configured parameters to graph the contents of
+    the file in the required form
+    """
+
+
 #create root window
 root = Tk()
 root.title("A.R.F. Interface") 
