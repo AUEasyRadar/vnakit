@@ -10,7 +10,7 @@ import matplotlib.animation as animation
 from matplotlib import style
 style.use('ggplot')
 from random import *
-from ConfigTab import Startup
+#from ConfigTab import Startup
 from CommandTab import CMD_Tab
 from LivePlot import LivePlot
 from MotorTab import MotorCont
@@ -19,10 +19,107 @@ from PlotTab import DataPlot
 from RadarTab import RadarPlot
 
 VER_NUMBER = '0.1'
+#configurationSettings
+
+def Startup(parent, number, msg = '???'):
+
+    
+    def configureButtonPress():
+
+        print('Button Was Pressed')
+        print(parent.freqEntry.get(),'MHz')
+        print(parent.powerEntry.get(),'dBm')
+        
+        # Define Settings for the Board
+        rx_num = 4 #Reciever Port to be read from
+        tx_num = 3 #Transmitter Port {VNAKit.RecordingSettings.txTr}
+        LF = int(parent.freqEntry.get()) #Start Freq. (MHz) {VNAKit.RecordingSettings.freqRange.freqStartMHz}
+        UF = int(parent.freqEntry.get()) #Stop Freq. (MHz) {VNAKit.RecordingSettings.freqRange.freqStopMHz}
+        PTS = 1000 #Num Freq. Pts (MHz) {VNAKit.RecordingSettings.freqRange.numFreqPoints}
+        RBW = 10 #Resolution BW (KHz) {VNAKit.RecordingSettings.rbw_khz}
+        PWR = int(parent.powerEntry.get()) #Tx Power setting (dBm) {VNAKit.RecordingSettings.outputPower_dbm)
+        #VNA Kit Mode {VNAKit.RecordingSettings.mode}
+        #MODE = self.mode_sel[v.get()]
+
+        # Create RecordingSettings Object and apply settings to the board
+        settings = vnakit.RecordingSettings(vnakit.FrequencyRange(LF,UF,PTS),RBW,PWR,tx_num, vnakit.VNAKIT_MODE_ONE_PORT)
+        #vnakit.ApplySettings(settings)
+
+        print('The board is initialized with settings:\n')
+        print(getSettingsStr(settings))
+        parent.configured = 'Configured'
+        parent.configMsg['text'] = parent.configured
+        parent.configMsg['foreground'] = 'green'
+
+    def freqStringValidate():
+        freq = int(float(parent.freqEntry.get()))
+        if freq > 6000:
+            freq = 6000
+            parent.configured = 'not configured'
+            parent.configMsg['text'] = parent.configured
+            parent.configMsg['foreground'] = 'red'
+        elif freq < 100:
+            freq = 100
+            parent.configured = 'not configured'
+            parent.configMsg['text'] = parent.configured
+            parent.configMsg['foreground'] = 'red'
+        parent.freqEntry.delete(0,'end')
+        parent.freqEntry.insert(0,str(freq))
+        return 1
+    def powerLevelChange(newVal):
+        parent.configured = 'not configured'
+        parent.configMsg['text'] = configured
+        parent.configMsg['foreground'] = 'red'
+        power = int(parent.powerEntry.get()) 
+
+    #parent.number = number
+    #parent.parent = parent
+    freq = 700#parent.LF
+    power = -26#parent.PWR
+    #parent.
+    configured = 'Not Configured'
+    #
+    ttk.Label(parent, text = 'Startup :').grid(column = 0, row = (2*(number-1)), sticky = (N,S,E))
+    ttk.Label(parent, text = msg).grid(column = 1, row = (2*(number-1)), columnspan = 6, sticky = (N,S,W))
+    ttk.Label(parent, text = 'MHz',).grid(column = 1, row = 1 + 2*(number-1), sticky = W)
+    ttk.Label(parent, text = 'dBm').grid(column = 3, row = 1 + 2*(number-1), sticky = W)
+    #Configured Label
+    parent.configMsg = ttk.Label(parent, text = configured, foreground = 'red', anchor = E)
+    parent.configMsg.grid(column = 4, row = 1 + 2*(number-1), sticky=(E,W))
+    #Configure Button
+    parent.configBtn = ttk.Button(parent, text='Setup', command = configureButtonPress)
+    parent.configBtn.grid(column = 5, row = 1 + 2*(number-1))
+    # Enter Frequency
+    parent.freqEntry = ttk.Entry(parent, width = 6, validate = 'focusout', validatecommand = freqStringValidate)
+    parent.freqEntry.insert(0,str(freq))
+    parent.freqEntry.grid(column = 0, row = 1 + 2*(number-1), sticky = (W))
+    # Enter Power
+    parent.powerEntry = Scale(parent, from_=-26, to=0, orient=HORIZONTAL, command = powerLevelChange)
+    parent.powerEntry.set(power)
+    #parent.powerEntry.delete(0,'end')
+    #parent.powerEntry.insert(0,'0')
+    parent.powerEntry.grid(column = 2, row = 1 + 2*(number-1), sticky = E)
+    # Radio Widgit
+    #v = tk.IntVar()
+    #v.set(1)
+    #parent.modeButton1 = ttk.Radiobutton(parent, text = "Single Port Mode", variable = v, value = 1)
+    #parent.modeButton1.grid(column = 0, row = 2)
+    #parent.modeButton2 = ttk.Radiobutton(parent, text = "Dual Port Mode", variable = v, value = 2)
+    #parent.modeButton2.grid(column = 0, row = 3)
+    #Configure Row and Column Weight
+    parent.rowconfigure(2 * (number-1), weight = 1)
+    parent.rowconfigure(1 + 2 * (number-1), weight = 1)
+    parent.columnconfigure(0, weight = 0)
+    parent.columnconfigure(1, weight = 0)
+    parent.columnconfigure(2, weight = 0)
+    parent.columnconfigure(3, weight = 0)
+    parent.columnconfigure(4, weight = 1)
+    parent.columnconfigure(5, weight = 0)
+    parent.columnconfigure(6, weight = 0)
 
 def connectButton():
     print("Connect Button Pressed")
-   # vnakit.Init()
+    #vnakit.Init()
     connected = "Connected"
     root.connectBtn.configure(text = connected, bg = 'green')
     # Add error trapping if vnakit.Init() fails
@@ -68,7 +165,8 @@ notebook.add(Data_frame, text = 'Manual Data Gather')
 notebook.add(Radar_frame, text = 'Radar Plots')
 
 #Startup Tab
-STRT = Startup(Config_frame, 1, 'Setup')
+#STRT = 
+Startup(Config_frame, 1, 'Setup')
 #Motor Tab
 MOTOR = MotorCont(CMD_frame, 1, 'Motor Command')
 #Plot Tab
@@ -100,3 +198,6 @@ root.rowconfigure(2, weight = 0)
 root.rowconfigure(3, weight = 1)
 
 root.mainloop()
+
+
+   

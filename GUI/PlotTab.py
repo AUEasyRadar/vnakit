@@ -65,7 +65,7 @@ class DataPlot:
 		ttk.Radiobutton(parent, text = "Real Tme", variable = actualOrLoad, value = 0, command = toggleButtonState).grid(column = 0, columnspan = 1, row = (2 * (number + 8)), sticky = W, padx = 10, pady = 10)
 		ttk.Radiobutton(parent, text = "Use File", variable = actualOrLoad, value = 1, command = toggleButtonState).grid(column = 1, columnspan = 1, row = (2 * (number + 8)), sticky = E, padx = 4, pady = 10)
 		browseButton = ttk.Button(parent, text = "Browse", command = browseToFile, state = 'disabled')
-		browseButton.grid(column = 2, row = (2 * (number + 8)), sticky = W, pady = 10)
+		browseButton.grid(column = 2, row = (2 * (number + 8)), pady = 10)
 		#Samples
 		ttk.Label(parent, text = "Number of samples per frequency").grid(column = 0, columnspan = 2, row = (2 * (number + 9)), sticky = W, pady = 10, padx = 10)
 		samples = Entry(parent)

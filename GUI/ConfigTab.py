@@ -1,4 +1,4 @@
-from tkinter import *
+'''from tkinter import *
 from tkinter import ttk
 import os
 import vnakit
@@ -38,12 +38,12 @@ class Startup:
         #self.powerEntry.insert(0,'0')
         self.powerEntry.grid(column = 2, row = 1 + 2*(number-1), sticky = E)
         # Radio Widgit
-        v = tk.IntVar()
-        v.set(1)
-        self.modeButton1 = ttk.Radiobutton(parent, text = "Single Port Mode", variable = v, value = 1)
-        self.modeButton1.grid(column = 0, row = 2)
-        self.modeButton2 = ttk.Radiobutton(parent, text = "Dual Port Mode", variable = v, value = 2)
-        self.modeButton2.grid(column = 0, row = 3)
+        #v = tk.IntVar()
+        #v.set(1)
+        #self.modeButton1 = ttk.Radiobutton(parent, text = "Single Port Mode", variable = v, value = 1)
+        #self.modeButton1.grid(column = 0, row = 2)
+        #self.modeButton2 = ttk.Radiobutton(parent, text = "Dual Port Mode", variable = v, value = 2)
+        #self.modeButton2.grid(column = 0, row = 3)
         #Configure Row and Column Weight
         parent.rowconfigure(2 * (number-1), weight = 1)
         parent.rowconfigure(1 + 2 * (number-1), weight = 1)
@@ -70,7 +70,7 @@ class Startup:
         RBW = 10 #Resolution BW (KHz) {VNAKit.RecordingSettings.rbw_khz}
         PWR = int(self.powerEntry.get()) #Tx Power setting (dBm) {VNAKit.RecordingSettings.outputPower_dbm)
         #VNA Kit Mode {VNAKit.RecordingSettings.mode}
-        MODE = self.mode_sel[v.get()]
+        #MODE = self.mode_sel[v.get()]
 
         # Create RecordingSettings Object and apply settings to the board
         settings = vnakit.RecordingSettings(vnakit.FrequencyRange(LF,UF,PTS),RBW,PWR,tx_num,MODE)
@@ -104,3 +104,4 @@ class Startup:
             self.configMsg['text'] = self.configured
             self.configMsg['foreground'] = 'red'
             self.power = self.powerLevel     
+'''

@@ -11,7 +11,8 @@ class DataGather:
 	def __init__(self, parent, number, msg = '???'):
 		self.number = number
 		self.parent = parent
-			
+		def browseToFolder():
+			print("Browsing to folder")
 		#x-axis
 		ttk.Label(parent, text='x-Axis:').grid(column = 0, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
 		xAxisOptions = ["", "S11", "S12", "S21", "S22", "Gain", "VSWR"]
@@ -49,7 +50,16 @@ class DataGather:
 		timeOptionsSelect = StringVar(parent)
 		timeOptionsSelect.set(timeOptions[1])
 		ttk.OptionMenu(parent, timeOptionsSelect, *timeOptions).grid(column = 2, row = (2*(number + 6)), sticky = (W), pady = 10)
-		
+		#File name
+		ttk.Label(parent, text = "File Name").grid(column = 0, row = (2 * (number + 7)), sticky = W, pady = 10, padx = 10)
+		measureTime = Entry(parent, width = "30")
+		measureTime.grid(column = 1, columnspan = 2, row = (2*(number + 7)))
+		#Save location
+		ttk.Label(parent, text = "Save Location").grid(column = 0, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 10)
+		measureTime = Entry(parent, width = "30")
+		measureTime.grid(column = 1, columnspan = 2, row = (2*(number + 8)))
+		saveLocationButton = ttk.Button(parent, text = "Browse", command = browseToFolder)
+		saveLocationButton.grid(column = 3, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 5)
 		'''#x-axis range
 		ttk.Label(parent, text='x-Axis Range').grid(column = 0, row = (2*number), sticky = (W), padx = 10, pady = 10)
 		xAxisLeft = Entry(parent, width = "17")
