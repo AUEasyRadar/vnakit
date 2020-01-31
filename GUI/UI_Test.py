@@ -53,7 +53,7 @@ def Startup(parent, number, msg = '???'):
         parent.configMsg['foreground'] = 'green'
 
     def freqStringValidate():
-        """Validates the input string of the frequency box and changes the
+        """Validates the input string of the frequency box and changes thegggg
         status indicator to not configured
         """
         freq = int(float(parent.freqEntry.get()))
