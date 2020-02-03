@@ -25,56 +25,98 @@ def drawPlot(canvas, figure):
     canvasFigure.draw()
     canvasFigure.get_tk_widget().grid(column = 0, row = 0)
 
-def checkBounds():
-    """Validates the input strings of the X limits boxes"""
+def checkLowerFrequencyBound():
+    """Validates the input string of the lower X limit box"""
     lowerX = lowerXLimit.get()
+    upperX = upperXLimit.get()
     if lowerX != '':
         lowerX = int(float(lowerXLimit.get()))
+        if upperX != '':
+            upperX = int(float(upperXLimit.get()))
+            if lowerX > upperX:
+                lowerX = upperX
+        if lowerX < 100:
+            lowerX = 100
+    elif upperX != '':
+        upperX = int(float(upperXLimit.get()))
+        if upperX < 1000:
+            lowerX = upperX
+        else:
+            lowerX = 1000
+    lowerXLimit.delete(0, 'end')
+    lowerXLimit.insert(0,lowerX)
+    return 1
+
+def checkUpperFrequencyBound():
+    """Validates the input string of the upper X limit box"""
+    lowerX = lowerXLimit.get()
     upperX = upperXLimit.get()
     if upperX != '':
         upperX = int(float(upperXLimit.get()))
-    if upperX != '' and upperX > 6000:
+        if upperX > 6000:
+            upperX = 6000
+        elif lowerX != '':
+            lowerX = int(float(lowerXLimit.get()))
+            if lowerX > upperX:
+                upperX = lowerX
+    else:
         upperX = 6000
-        upperXLimit.delete(0, 'end')
-        upperXLimit.insert(0,str(upperX))
-    elif lowerX != '' and lowerX < 100:
-        lowerX = 100
-        lowerXLimit.delete(0, 'end')
-        lowerXLimit.insert(0,str(lowerX))
-    if lowerX != '' and upperX != '' and upperX >= 100 and upperX < lowerX:
-        lowerX = upperX
-        lowerXLimit.delete(0, 'end')
-        lowerXLimit.insert(0,str(lowerX))
-    elif lowerX != '' and upperX != ''  and lowerX <= 6000 and upperX < lowerX:
-        upperX = lowerX
-        upperXLimit.delete(0, 'end')
-        upperXLimit.insert(0,str(upperX))
-    checkResolutionBandwidth()
+    upperXLimit.delete(0, 'end')
+    upperXLimit.insert(0,upperX)
     return 1
+
 def checkResolutionBandwidth():
     """Validates the input divides evenly into the x-limits"""
-    lowerX = lowerXLimit.get()
-    if lowerX != '':
-        lowerX = int(lowerX)
-    upperX = upperXLimit.get()
-    if upperX != '':
-        upperX = int(upperX)
     rbw = resolutionBandwidth.get()
     if rbw != '':
-        rbw = float(rbw)
-    if  lowerX != '' and upperX != '' and rbw != '':
-        difference = float(upperX - lowerX)
-        result = difference % rbw
-        if result != 0:
-            newValue = difference / rbw
-            if (newValue - int(newValue)) >= 0.5:
-                newValue = float(difference / (int(newValue) + 1))
-            else:
-                newValue = float(difference / int(newValue))
-            resolutionBandwidth.delete(0, 'end')
-            resolutionBandwidth.insert(0,str(newValue))
-    return 1
+        rbw = int(float(rbw))
+        lowerX = lowerXLimit.get()
+        if lowerX != '':
+            lowerX = int(float(lowerX))
+            upperX = upperXLimit.get()
+            if upperX != '':
+                upperX = int(float(upperX))
+                maxRbw = int((upperX - lowerX) / 2)
+                if rbw > maxRbw:
+                    rbw = maxRbw
+        if rbw < 1:
+            rbw = 1
+    else:
+        rbw = 500
+    resolutionBandwidth.delete(0, 'end')
+    resolutionBandwidth.insert(0, str(rbw))
+
     
+def checkOutputPwrBounds():
+    """Validates the output power is within the valide range -26 to 0"""
+    currentValue = outputPwr.get()
+    if currentValue != '':
+        currentValue = int(float(currentValue))
+        if currentValue < -26:
+            currentValue = -26.0
+        elif currentValue > 0:
+            currentValue = 0.0
+    else:
+            currentValue = -3
+    outputPwr.delete(0, 'end')
+    outputPwr.insert(0,str(currentValue))
+    
+    return 1
+
+def checkFrequencyPoints():
+    currentValue = numberOfFrequencyPoints.get()
+    if currentValue != '':
+        currentValue = int(float(currentValue))
+        if currentValue < 2:
+            currentValue = 2
+        elif currentValue > 1000:
+            currentValue = 1000
+        numberOfFrequencyPoints.delete(0, 'end')
+        numberOfFrequencyPoints.insert(0, currentValue)
+    else:
+        numberOfFrequencyPoints.delete(0, 'end')
+        numberOfFrequencyPoints.insert(0, 500)
+    return 1
 
 #create root window
 root = Tk()
@@ -95,35 +137,44 @@ Label(title_frame, text = 'Port Mode:', font = ('TkDefaultFont', 20)).pack(side 
 
 # Create graph frame
 graph_frame = Frame(root)
-graph_frame.pack(side = TOP, fill = BOTH, expand = True)#.grid(column = 0, columnspan = 1, row = 1)
+graph_frame.pack(side = TOP, fill = BOTH, expand = True)
 dataPlot = Canvas(graph_frame, bg = "black")
-dataPlot.pack(side = LEFT, padx = 10, pady = 10, fill = BOTH, expand = True)#grid(column = 0, row = 0, sticky = (W,N), padx = 10, pady = 10)
+dataPlot.pack(side = LEFT, padx = 10, pady = 10, fill = BOTH, expand = True)
 
 # Create Settings frame
 settings_frame = Frame(graph_frame)
-settings_frame.pack(side = RIGHT, padx = 20, pady = 11, anchor = N)#grid(column = 1, row = 0, sticky = N, padx = 20, pady = 11)
+settings_frame.pack(side = RIGHT, padx = 20, pady = 11, anchor = N)
 Label(settings_frame, text = 'X - Axis Limits ').grid(row = 0, column = 0, pady = 7)
-lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkBounds)
+lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkLowerFrequencyBound)
+lowerXLimit.insert(0, 1000)
 lowerXLimit.grid(row = 0, column = 1, pady = 7)
 Label(settings_frame, text = 'Mhz  to ').grid(row = 0, column = 2, pady = 7)
-upperXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkBounds)
+upperXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkUpperFrequencyBound)
+upperXLimit.insert(0, 6000)
 upperXLimit.grid(row = 0, column = 3, pady = 7)
 Label(settings_frame, text = 'Mhz').grid(row = 0, column = 4, pady = 7)
 Label(settings_frame, text = 'Number of Frequency points ').grid(row = 1, column = 0, \
     columnspan = 3, pady = 7, sticky = W)
-Entry(settings_frame, width = 5).grid(row = 1, column = 3, pady = 7)
-Label(settings_frame, text='Resolution Bandwidth ').grid(row = 2, column = 0, columnspan = 3, \
+numberOfFrequencyPoints = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkFrequencyPoints)
+numberOfFrequencyPoints.insert(0, 500)
+numberOfFrequencyPoints.grid(row = 1, column = 3, pady = 7)
+Label(settings_frame, text = 'Resolution Bandwidth ').grid(row = 2, column = 0, columnspan = 3, \
     pady = 7, sticky = W)
 resolutionBandwidth = Entry(settings_frame, width = 16, validate = 'focusout', validatecommand = checkResolutionBandwidth)
+resolutionBandwidth.insert(0, 100)
 resolutionBandwidth.xview_scroll(2, UNITS)
 resolutionBandwidth.grid(row = 2, column = 1, columnspan = 3, pady = 7, sticky = E)
 Label(settings_frame, text = 'khz').grid(row = 2, column = 4, pady = 7)
 Label(settings_frame, text='Output Power ').grid(row = 3, column = 0, pady = 7, sticky = W)
-Entry(settings_frame, width = 5).grid(row = 3, column = 1, pady = 7)
+outputPwr = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkOutputPwrBounds)
+outputPwr.insert(0, -3)
+outputPwr.grid(row = 3, column = 1, pady = 7)
 Label(settings_frame, text = 'dbm').grid(row = 3, column = 2, pady = 7, sticky = W)
 Label(settings_frame, text = 'Transmit Port').grid(row = 4, column = 0, pady = 7, sticky = W)
-txPort = Spinbox(settings_frame, value = [1,2,3,4,5,6], wrap = True, width = 4)
-txPort.grid(row = 4, column = 1, pady = 7)
+txMode = StringVar(settings_frame)
+txMode.set(4)
+txDropdown = OptionMenu(settings_frame, txMode, 1, 2, 3, 4, 5, 6)
+txDropdown.grid(row = 4, column = 1, pady = 7)
 Label(settings_frame, text = 'Recording Mode ').grid(row = 5, column = 0, pady = 7, sticky = W)
 recordingMode = IntVar()
 Radiobutton(settings_frame, text = '1 Port Mode', variable = recordingMode, \
@@ -133,10 +184,8 @@ Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
 
 # Add buttons to the bottom of the GUI
 button_frame = Frame(root)
-button_frame.pack(side = BOTTOM)#.grid(column = 0, row = 2, padx = 10, pady = 10, sticky = W)
+button_frame.pack(side = BOTTOM)
 Button(button_frame, text = 'Program').grid(row = '0', column = '0')
 Button(button_frame, text = 'Begin Run').grid(row = '0', column = '1')
-
-#label1.grid(row = 0, column = 0, sticky = N)
 
 root.mainloop()
