@@ -2,9 +2,12 @@ from tkinter import *
 #from tkinter import ttk 
 import vnakit
 #from vnakit_ex import getSettingsStr
-import matplotlib.backends.tkagg as FigureCanvasTkAgg
+#import matplotlib.backends.tkagg as FigureCanvasTkAgg
 #from matplotlib.backends.tkagg as FigureCanvasTkAgg
-#from matplotlib.figure import Figure 
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib import figure
+from matplotlib import axes
+
 #import matplotlib.animation as animation
 #from matplotlib import style
 #style.use('ggplot')
@@ -138,8 +141,20 @@ Label(title_frame, text = 'Port Mode:', font = ('TkDefaultFont', 20)).pack(side 
 # Create graph frame
 graph_frame = Frame(root)
 graph_frame.pack(side = TOP, fill = BOTH, expand = True)
-dataPlot = Canvas(graph_frame, bg = "black")
-dataPlot.pack(side = LEFT, padx = 10, pady = 10, fill = BOTH, expand = True)
+
+graphFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="white")
+xaxis = axes.Axes(graphFigure, [0.1, 0.1, 0.8, 0.8], frameon = True, adjustable = 'box', in_layout = True, xscale = 'log', autoscalex_on = True, xlabel = 'frequency', xlim = (100, 6000), yscale = 'linear')
+xaxis.grid(which = 'both')
+axes = graphFigure.add_axes(xaxis)
+canvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+canvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
+
+xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
+yVals = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95]
+graphFigure.axes[0].semilogx(xVals, yVals, 'rx')
+
+
+
 
 # Create Settings frame
 settings_frame = Frame(graph_frame)
@@ -183,9 +198,9 @@ Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
     value = vnakit.VNAKIT_MODE_TWO_PORTS).grid(row = 6, column = 1, columnspan = 2)
 
 # Add buttons to the bottom of the GUI
-button_frame = Frame(root)
-button_frame.pack(side = BOTTOM)
-Button(button_frame, text = 'Program').grid(row = '0', column = '0')
-Button(button_frame, text = 'Begin Run').grid(row = '0', column = '1')
+button_frame = Frame(root, height = 45, pady = 10)
+button_frame.pack(side = BOTTOM, fill = X)
+Button(button_frame, text = 'Program').place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
+Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)#.grid(row = '0', column = '1')
 
 root.mainloop()
