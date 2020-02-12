@@ -23,11 +23,6 @@ from matplotlib import axes
 #VER_NUMBER = '0.1'
 #configurationSettings
 
-def drawPlot(canvas, figure):
-    canvasFigure = FigureCanvasAgg(figure, master=canvas)
-    canvasFigure.draw()
-    canvasFigure.get_tk_widget().grid(column = 0, row = 0)
-
 def checkLowerFrequencyBound():
     """Validates the input string of the lower X limit box"""
     lowerX = lowerXLimit.get()
