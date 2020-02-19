@@ -116,6 +116,14 @@ def checkFrequencyPoints():
         numberOfFrequencyPoints.insert(0, 500)
     return 1
 
+def plotthings():
+    graphGrid.clear()
+    newYVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 0,0,0]
+    graphFigure.axes[0].plot(xVals, newYVals, 'bx')
+    plotCanvas.draw()
+    #canvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+    #canvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
+
 #create root window
 root = Tk()
 root.title("A.R.F. Interface") 
@@ -138,15 +146,15 @@ graph_frame = Frame(root)
 graph_frame.pack(side = TOP, fill = BOTH, expand = True)
 
 graphFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="white")
-xaxis = axes.Axes(graphFigure, [0.1, 0.1, 0.8, 0.8], frameon = True, adjustable = 'box', in_layout = True, xscale = 'log', autoscalex_on = True, xlabel = 'frequency', xlim = (100, 6000), yscale = 'linear')
-xaxis.grid(which = 'both')
-axes = graphFigure.add_axes(xaxis)
-canvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
-canvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
+graphGrid = axes.Axes(graphFigure, [0.1, 0.1, 0.8, 0.8], frameon = True, adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))#, autoscaley_on = True)
+graphGrid.grid(which = 'both')
+graphFigure.add_axes(graphGrid)
+plotCanvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+plotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 
 xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
-yVals = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95]
-graphFigure.axes[0].semilogx(xVals, yVals, 'rx')
+yVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 3, 6, 9]
+graphFigure.axes[0].plot(xVals, yVals, 'rx')
 
 
 
@@ -180,11 +188,11 @@ outputPwr = Entry(settings_frame, width = 5, validate = 'focusout', validatecomm
 outputPwr.insert(0, -3)
 outputPwr.grid(row = 3, column = 1, pady = 7)
 Label(settings_frame, text = 'dbm').grid(row = 3, column = 2, pady = 7, sticky = W)
-Label(settings_frame, text = 'Transmit Port').grid(row = 4, column = 0, pady = 7, sticky = W)
-txMode = StringVar(settings_frame)
-txMode.set(4)
-txDropdown = OptionMenu(settings_frame, txMode, 1, 2, 3, 4, 5, 6)
-txDropdown.grid(row = 4, column = 1, pady = 7)
+#Label(settings_frame, text = 'Transmit Port').grid(row = 4, column = 0, pady = 7, sticky = W)
+#txMode = StringVar(settings_frame)
+#txMode.set(4)
+#txDropdown = OptionMenu(settings_frame, txMode, 1, 2, 3, 4, 5, 6)
+#txDropdown.grid(row = 4, column = 1, pady = 7)
 Label(settings_frame, text = 'Recording Mode ').grid(row = 5, column = 0, pady = 7, sticky = W)
 recordingMode = IntVar()
 Radiobutton(settings_frame, text = '1 Port Mode', variable = recordingMode, \
@@ -195,7 +203,7 @@ Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
 # Add buttons to the bottom of the GUI
 button_frame = Frame(root, height = 45, pady = 10)
 button_frame.pack(side = BOTTOM, fill = X)
-Button(button_frame, text = 'Program').place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
+Button(button_frame, text = 'Program', command = plotthings).place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
 Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)#.grid(row = '0', column = '1')
 
 root.mainloop()
