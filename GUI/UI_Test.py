@@ -1,385 +1,209 @@
 from tkinter import *
-from tkinter import ttk 
+#from tkinter import ttk 
 import vnakit
-from vnakit_ex import getSettingsStr
-import matplotlib
-matplotlib.use("TkAgg")
+#from vnakit_ex import getSettingsStr
+#import matplotlib.backends.tkagg as FigureCanvasTkAgg
+#from matplotlib.backends.tkagg as FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure 
-import matplotlib.animation as animation
-from matplotlib import style
-style.use('ggplot')
-from random import *
+from matplotlib import figure
+from matplotlib import axes
+
+#import matplotlib.animation as animation
+#from matplotlib import style
+#style.use('ggplot')
+#from random import *
 #from ConfigTab import Startup
-from CommandTab import CMD_Tab
-from LivePlot import LivePlot
-from MotorTab import MotorCont
+#from CommandTab import CMD_Tab
+#from LivePlot import LivePlot
+#from MotorTab import MotorCont
 #from DataTab import DataGather
 #from PlotTab import DataPlot
 #from RadarTab import RadarPlot
 
-VER_NUMBER = '0.1'
+#VER_NUMBER = '0.1'
 #configurationSettings
 
-
-def Startup(parent, number, msg = '???'):
-    """Populates the Setup tab of the GUI"""
-    
-    def configureButtonPress():
-        """Operates the setup button"""
-        print('Button Was Pressed')
-        print(parent.freqEntry.get(),'MHz')
-        print(parent.powerEntry.get(),'dBm')
-        
-        # Define Settings for the Board
-        rx_num = 4 #Reciever Port to be read from
-        tx_num = 3 #Transmitter Port {VNAKit.RecordingSettings.txTr}
-        LF = int(parent.freqEntry.get()) #Start Freq. (MHz) {VNAKit.RecordingSettings.freqRange.freqStartMHz}
-        UF = int(parent.freqEntry.get()) #Stop Freq. (MHz) {VNAKit.RecordingSettings.freqRange.freqStopMHz}
-        PTS = 1000 #Num Freq. Pts (MHz) {VNAKit.RecordingSettings.freqRange.numFreqPoints}
-        RBW = 10 #Resolution BW (KHz) {VNAKit.RecordingSettings.rbw_khz}
-        PWR = int(parent.powerEntry.get()) #Tx Power setting (dBm) {VNAKit.RecordingSettings.outputPower_dbm)
-        #VNA Kit Mode {VNAKit.RecordingSettings.mode}
-        #MODE = self.mode_sel[v.get()]
-
-        # Create RecordingSettings Object and apply settings to the board
-        settings = vnakit.RecordingSettings(vnakit.FrequencyRange(LF,UF,PTS),RBW,PWR,tx_num, vnakit.VNAKIT_MODE_ONE_PORT)
-        #vnakit.ApplySettings(settings)
-
-        print('The board is initialized with settings:\n')
-        print(getSettingsStr(settings))
-        parent.configured = 'Configured'
-        parent.configMsg['text'] = parent.configured
-        parent.configMsg['foreground'] = 'green'
-
-    def freqStringValidate():
-        """Validates the input string of the frequency box and changes thegggg
-        status indicator to not configured
-        """
-        freq = int(float(parent.freqEntry.get()))
-        if freq > 6000:
-            freq = 6000
-            parent.configured = 'not configured'
-            parent.configMsg['text'] = parent.configured
-            parent.configMsg['foreground'] = 'red'
-        elif freq < 100:
-            freq = 100
-            parent.configured = 'not configured'
-            parent.configMsg['text'] = parent.configured
-            parent.configMsg['foreground'] = 'red'
-        parent.freqEntry.delete(0,'end')
-        parent.freqEntry.insert(0,str(freq))
-        return 1
-    def powerLevelChange():
-        """Changes the status indicator to not configured"""
-        parent.configured = 'not configured'
-        parent.configMsg['text'] = configured
-        parent.configMsg['foreground'] = 'red'
-
-    #parent.number = number
-    #parent.parent = parent
-    freq = 700#parent.LF
-    power = -26#parent.PWR
-    #parent.
-    configured = 'Not Configured'
-    #
-    ttk.Label(parent, text = 'Startup :').grid(column = 0, row = (2*(number-1)), sticky = (N,S,E))
-    ttk.Label(parent, text = msg).grid(column = 1, row = (2*(number-1)), columnspan = 6, sticky = (N,S,W))
-    ttk.Label(parent, text = 'MHz',).grid(column = 1, row = 1 + 2*(number-1), sticky = W)
-    ttk.Label(parent, text = 'dBm').grid(column = 3, row = 1 + 2*(number-1), sticky = W)
-    #Configured Label
-    parent.configMsg = ttk.Label(parent, text = configured, foreground = 'red', anchor = E)
-    parent.configMsg.grid(column = 4, row = 1 + 2*(number-1), sticky=(E,W))
-    #Configure Button
-    parent.configBtn = ttk.Button(parent, text='Setup', command = configureButtonPress)
-    parent.configBtn.grid(column = 5, row = 1 + 2*(number-1))
-    # Enter Frequency
-    parent.freqEntry = ttk.Entry(parent, width = 6, validate = 'focusout', validatecommand = freqStringValidate)
-    parent.freqEntry.insert(0,str(freq))
-    parent.freqEntry.grid(column = 0, row = 1 + 2*(number-1), sticky = (W))
-    # Enter Power
-    parent.powerEntry = Scale(parent, from_=-26, to=0, orient=HORIZONTAL, command = powerLevelChange)
-    parent.powerEntry.set(power)
-    #parent.powerEntry.delete(0,'end')
-    #parent.powerEntry.insert(0,'0')
-    parent.powerEntry.grid(column = 2, row = 1 + 2*(number-1), sticky = E)
-    # Radio Widgit
-    #v = tk.IntVar()
-    #v.set(1)
-    #parent.modeButton1 = ttk.Radiobutton(parent, text = "Single Port Mode", variable = v, value = 1)
-    #parent.modeButton1.grid(column = 0, row = 2)
-    #parent.modeButton2 = ttk.Radiobutton(parent, text = "Dual Port Mode", variable = v, value = 2)
-    #parent.modeButton2.grid(column = 0, row = 3)
-    #Configure Row and Column Weight
-    parent.rowconfigure(2 * (number-1), weight = 1)
-    parent.rowconfigure(1 + 2 * (number-1), weight = 1)
-    parent.columnconfigure(0, weight = 0)
-    parent.columnconfigure(1, weight = 0)
-    parent.columnconfigure(2, weight = 0)
-    parent.columnconfigure(3, weight = 0)
-    parent.columnconfigure(4, weight = 1)
-    parent.columnconfigure(5, weight = 0)
-    parent.columnconfigure(6, weight = 0)
-
-def DataPlot(parent, number, msg = '???'):
-    """Populates the Manual Plot tab of the GUI"""
-    def browseToFile():
-        """Return the file's path"""
-        print("Browsing to file")
-    def toggleButtonState():
-        """Controls the usability of the browse button"""
-        if actualOrLoad.get() == 0:
-            browseButton['state'] = 'disabled'
-        
+def checkLowerFrequencyBound():
+    """Validates the input string of the lower X limit box"""
+    lowerX = lowerXLimit.get()
+    upperX = upperXLimit.get()
+    if lowerX != '':
+        lowerX = int(float(lowerXLimit.get()))
+        if upperX != '':
+            upperX = int(float(upperXLimit.get()))
+            if lowerX > upperX:
+                lowerX = upperX
+        if lowerX < 100:
+            lowerX = 100
+    elif upperX != '':
+        upperX = int(float(upperXLimit.get()))
+        if upperX < 1000:
+            lowerX = upperX
         else:
-            browseButton['state'] = 'normal'
-        
-    #x-axis
-    ttk.Label(parent, text='x-Axis:').grid(column = 0, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
-    xAxisOptions = ["", "S11", "S12", "S21", "S22", "Gain", "VSWR"]
-    xAxisOptionsSelect = StringVar(parent)
-    xAxisOptionsSelect.set(xAxisOptions[1])
-    ttk.OptionMenu(parent, xAxisOptionsSelect, *xAxisOptions).grid(column = 1, row = (2*(number-1)), sticky = (W), pady = 10)
-    #y-axis
-    ttk.Label(parent, text='y-Axis:').grid(column = 2, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
-    yAxisOptions = ["Frequency", "Time"]
-    yAxisOptionsSelect = StringVar(parent)
-    yAxisOptionsSelect.set(yAxisOptions[0])
-    ttk.OptionMenu(parent, yAxisOptionsSelect, *yAxisOptions).grid(column = 3, row = (2*(number-1)), sticky = (W), pady = 10)
-    #Data type
-    ttk.Label(parent, text='Data Type:').grid(column = 0, row = (2*number), sticky = (W), padx = 10, pady = 10)
-    dataType = IntVar()
-    ttk.Radiobutton(parent, text = "Phase", variable = dataType, value = 0).grid(column = 1, columnspan = 3, row = (2 * number), sticky = W)
-    ttk.Radiobutton(parent, text = "Magnitude", variable = dataType, value = 1).grid(column = 1, columnspan = 3, row = (2 * number))
-    ttk.Radiobutton(parent, text = "Complex", variable = dataType, value = 2).grid(column = 1, columnspan = 3, row = (2 * number), sticky = E)
-    #x-axis range
-    ttk.Label(parent, text='x-Axis Range').grid(column = 0, row = (2*(number + 1)), sticky = (W), padx = 10, pady = 10)
-    xAxisLeft = Entry(parent, width = "17")
-    xAxisRight = Entry(parent, width = "17")
-    xAxisLeft.grid(column = 1, row = (2*(number + 1)))
-    ttk.Label(parent, text='to').grid(column = 2, row = (2* (number + 1)), padx = 10, pady = 10)
-    xAxisRight.grid(column = 3, row = (2*(number + 1)))
-    #y-axis range
-    ttk.Label(parent, text='y-Axis Range').grid(column = 0, row = (2*(number + 2)), sticky = (W), padx = 10, pady = 10)
-    yAxisLeft = Entry(parent, width = "17")
-    yAxisRight = Entry(parent, width = "17")
-    yAxisLeft.grid(column = 1, row = (2*(number + 2)))
-    ttk.Label(parent, text='to').grid(column = 2, row = (2*(number + 2)), padx = 10, pady = 10)
-    yAxisRight.grid(column = 3, row = (2*(number + 2)))
-    #chart type
-    ttk.Label(parent, text='Plot Type').grid(column = 0, row = (2*(number + 3)), sticky = (W), padx = 10, pady = 10)
-    smithChart = IntVar()
-    Checkbutton(parent, text="Smith", variable = smithChart).grid(column = 1, row = (2*(number + 4)), sticky = (W))
-    polarChart = IntVar()
-    Checkbutton(parent, text="Polar", variable = polarChart).grid(column = 1, row = (2*(number + 5)), sticky = (W))
-    linearChart = IntVar()
-    Checkbutton(parent, text="Linear", variable = linearChart).grid(column = 1, row = (2*(number + 6)), sticky = (W))
-    logscaleChart = IntVar()
-    Checkbutton(parent, text="Logscale", variable = logscaleChart).grid(column = 1, row = (2*(number + 7)), sticky = (W))
-    #real time or Load File
-    actualOrLoad = IntVar()
-    ttk.Radiobutton(parent, text = "Real Tme", variable = actualOrLoad, value = 0, command = toggleButtonState).grid(column = 0, columnspan = 1, row = (2 * (number + 8)), sticky = W, padx = 10, pady = 10)
-    ttk.Radiobutton(parent, text = "Use File", variable = actualOrLoad, value = 1, command = toggleButtonState).grid(column = 1, columnspan = 1, row = (2 * (number + 8)), sticky = E, padx = 4, pady = 10)
-    browseButton = ttk.Button(parent, text = "Browse", command = browseToFile, state = 'disabled')
-    browseButton.grid(column = 2, row = (2 * (number + 8)), pady = 10)
-    #Samples
-    ttk.Label(parent, text = "Number of samples per frequency").grid(column = 0, columnspan = 2, row = (2 * (number + 9)), sticky = W, pady = 10, padx = 10)
-    samples = Entry(parent)
-    samples.grid(column = 2, columnspan = 2, row = (2 * (number + 9)), sticky = W)
-    #sample type
-    sampleType = IntVar()
-    ttk.Radiobutton(parent, text = "Average", variable = sampleType, value = 0).grid(column = 1, columnspan = 1, row = (2 * (number + 10)), sticky = W)
-    ttk.Radiobutton(parent, text = "Min Hold", variable = sampleType, value = 1).grid(column = 1, columnspan = 1, row = (2 * (number + 11)), sticky = W)
-    ttk.Radiobutton(parent, text = "Max Hold", variable = sampleType, value = 2).grid(column = 1, columnspan = 1, row = (2 * (number + 12)), sticky = W)
-    #Measure Duration
-    ttk.Label(parent, text = "Measure Duration").grid(column = 0, row = (2 * (number + 13)), sticky = W, pady = 10, padx = 10)
-    measureTime = Entry(parent, width = "15")
-    measureTime.grid(column = 1, row = (2*(number + 13)))
-    timeOptions = ["", "s", "ms", "μs", "ns"]
-    timeOptionsSelect = StringVar(parent)
-    timeOptionsSelect.set(timeOptions[1])
-    ttk.OptionMenu(parent, timeOptionsSelect, *timeOptions).grid(column = 2, row = (2*(number + 13)), sticky = (W), pady = 10)
+            lowerX = 1000
+    lowerXLimit.delete(0, 'end')
+    lowerXLimit.insert(0,lowerX)
+    return 1
 
-def DataGather(parent, number, msg = '???'):
-    """Populates the Manual Gather tab of the GUI"""
-    def browseToFolder():
-        """Sets the save file path"""
-        print("Browsing to folder")
-    #x-axis
-    ttk.Label(parent, text='x-Axis:').grid(column = 0, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
-    xAxisOptions = ["", "S11", "S12", "S21", "S22", "Gain", "VSWR"]
-    xAxisOptionsSelect = StringVar(parent)
-    xAxisOptionsSelect.set(xAxisOptions[1])
-    ttk.OptionMenu(parent, xAxisOptionsSelect, *xAxisOptions).grid(column = 1, row = (2*(number-1)), sticky = (W), pady = 10)
-    #y-axis
-    ttk.Label(parent, text='y-Axis:').grid(column = 2, row = (2*(number-1)), sticky = (W), padx = 10, pady = 10)
-    yAxisOptions = ["Frequency", "Time"]
-    yAxisOptionsSelect = StringVar(parent)
-    yAxisOptionsSelect.set(yAxisOptions[0])
-    ttk.OptionMenu(parent, yAxisOptionsSelect, *yAxisOptions).grid(column = 3, row = (2*(number-1)), sticky = (W), pady = 10)
-    #Data store options
-    ttk.Label(parent, text='Data form:').grid(column = 0, row = (2*number), sticky = (W), padx = 10, pady = 10)
-    dataStoreType = IntVar()
-    ttk.Radiobutton(parent, text = "Polar", variable = dataStoreType, value = 0).grid(column = 1, columnspan = 3, row = (2 * number), sticky = W)
-    ttk.Radiobutton(parent, text = "Rectangular", variable = dataStoreType, value = 1).grid(column = 1, columnspan = 3, row = (2 * number), sticky = E)
-    #Delimiter selection
-    ttk.Label(parent, text='Delimiter').grid(column = 0, row = (2*(number + 1)), sticky = (W), padx = 10, pady = 10)
-    dataDelimiter = Entry(parent, width = "10")
-    dataDelimiter.grid(column = 1, row = (2*(number + 1)))
-    #Frequency Sweep
-    ttk.Label(parent, text = "Number of samples per frequency").grid(column = 0, columnspan = 2, row = (2 * (number + 2)), sticky = W, pady = 10, padx = 10)
-    samples = Entry(parent, width = 10)
-    samples.grid(column = 2, columnspan = 2, row = (2 * (number + 2)), sticky = W)
-    sampleGatherType = IntVar()
-    ttk.Radiobutton(parent, text = "Average", variable = sampleGatherType, value = 0).grid(column = 1, columnspan = 1, row = (2 * (number + 3)), sticky = W)
-    ttk.Radiobutton(parent, text = "Min Hold", variable = sampleGatherType, value = 1).grid(column = 1, columnspan = 1, row = (2 * (number + 4)), sticky = W)
-    ttk.Radiobutton(parent, text = "Max Hold", variable = sampleGatherType, value = 2).grid(column = 1, columnspan = 1, row = (2 * (number + 5)), sticky = W)
-    #Measure Duration
-    ttk.Label(parent, text = "Measure Duration").grid(column = 0, row = (2 * (number + 6)), sticky = W, pady = 10, padx = 10)
-    measureTime = Entry(parent, width = "15")
-    measureTime.grid(column = 1, row = (2*(number + 6)))
-    timeOptions = ["", "s", "ms", "μs", "ns"]
-    timeOptionsSelect = StringVar(parent)
-    timeOptionsSelect.set(timeOptions[1])
-    ttk.OptionMenu(parent, timeOptionsSelect, *timeOptions).grid(column = 2, row = (2*(number + 6)), sticky = (W), pady = 10)
-    #File name
-    ttk.Label(parent, text = "File Name").grid(column = 0, row = (2 * (number + 7)), sticky = W, pady = 10, padx = 10)
-    measureTime = Entry(parent, width = "30")
-    measureTime.grid(column = 1, columnspan = 2, row = (2*(number + 7)))
-    #Save location
-    ttk.Label(parent, text = "Save Location").grid(column = 0, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 10)
-    measureTime = Entry(parent, width = "30")
-    measureTime.grid(column = 1, columnspan = 2, row = (2*(number + 8)))
-    saveLocationButton = ttk.Button(parent, text = "Browse", command = browseToFolder)
-    saveLocationButton.grid(column = 3, row = (2 * (number + 8)), sticky = W, pady = 10, padx = 5)
+def checkUpperFrequencyBound():
+    """Validates the input string of the upper X limit box"""
+    lowerX = lowerXLimit.get()
+    upperX = upperXLimit.get()
+    if upperX != '':
+        upperX = int(float(upperXLimit.get()))
+        if upperX > 6000:
+            upperX = 6000
+        elif lowerX != '':
+            lowerX = int(float(lowerXLimit.get()))
+            if lowerX > upperX:
+                upperX = lowerX
+    else:
+        upperX = 6000
+    upperXLimit.delete(0, 'end')
+    upperXLimit.insert(0,upperX)
+    return 1
 
-def RadarPlot(parent, number, msg = '???'):
-    """Populates the Radar Tab"""
-    def startRadar():
-        """Will eventually start radar plotting"""
-        print('Radar has started')
-        print('S plots have stopped')
+def checkResolutionBandwidth():
+    """Validates the input divides evenly into the x-limits"""
+    rbw = resolutionBandwidth.get()
+    if rbw != '':
+        rbw = int(float(rbw))
+        lowerX = lowerXLimit.get()
+        if lowerX != '':
+            lowerX = int(float(lowerX))
+            upperX = upperXLimit.get()
+            if upperX != '':
+                upperX = int(float(upperX))
+                maxRbw = int((upperX - lowerX) / 2)
+                if rbw > maxRbw:
+                    rbw = maxRbw
+        if rbw < 1:
+            rbw = 1
+    else:
+        rbw = 500
+    resolutionBandwidth.delete(0, 'end')
+    resolutionBandwidth.insert(0, str(rbw))
 
-    def updateAngle():
+    
+def checkOutputPwrBounds():
+    """Validates the output power is within the valide range -26 to 0"""
+    currentValue = outputPwr.get()
+    if currentValue != '':
+        currentValue = int(float(currentValue))
+        if currentValue < -26:
+            currentValue = -26.0
+        elif currentValue > 0:
+            currentValue = 0.0
+    else:
+            currentValue = -3
+    outputPwr.delete(0, 'end')
+    outputPwr.insert(0,str(currentValue))
+    
+    return 1
 
-        parent.angleBox.insert(0,32)
+def checkFrequencyPoints():
+    currentValue = numberOfFrequencyPoints.get()
+    if currentValue != '':
+        currentValue = int(float(currentValue))
+        if currentValue < 2:
+            currentValue = 2
+        elif currentValue > 1000:
+            currentValue = 1000
+        numberOfFrequencyPoints.delete(0, 'end')
+        numberOfFrequencyPoints.insert(0, currentValue)
+    else:
+        numberOfFrequencyPoints.delete(0, 'end')
+        numberOfFrequencyPoints.insert(0, 500)
+    return 1
 
-    def updateRange():
-
-        rangeBox.insert(0,2)
-
-    ttk.Label(parent, text='Radar Plot:').grid(column = 0, row = (2*(number-1)), sticky = (N,S,E))
-    f = Figure(figsize = (4,4), dpi = 100, tight_layout = 'true')
-    f.add_axes([0.1, 0.1, 0.8, 0.8],projection='polar')
-    canvas = FigureCanvasTkAgg(f, parent)
-    canvas.get_tk_widget().grid(column=0, row=1, sticky =(N,S,E,W), columnspan=2, rowspan = 2)
-    ttk.Label(parent, text='Radar Angle').grid(column = 5, row = 0, columnspan = 7, sticky = N)
-    ttk.Label(parent, text=' Radar Distance').grid(column = 5, row = 2, columnspan = 7, sticky = N)
-    #call to grid function for GUI placement
-
-    angleBox = ttk.Entry(parent,validate = 'focusout', validatecommand = updateAngle)
-    angleBox.grid(column = 6, row = 1, columnspan = 6)
-
-    rangeBox = ttk.Entry(parent,validate = 'focusout', validatecommand = updateRange)
-    rangeBox.grid(column = 6, row = 2, columnspan = 6)
-
-    dataGather = ttk.Button(parent, text = 'Begin Radar', command = startRadar)
-    dataGather.grid(column = 0, row = 3, columnspan = 6, sticky = (W), padx = 10, pady = 10)
-
-    dataStop = ttk.Button(parent, text = 'Stop Radar', command = startRadar)
-    dataStop.grid(column = 0, row = 3, columnspan = 6, sticky = (E), padx = 10, pady = 10)
-
-def connectButton():
-    """Connects to the vnakit"""
-    print("Connect Button Pressed")
-    #vnakit.Init()
-    connected = "Connected"
-    root.connectBtn.configure(text = connected, bg = 'green')
-    # Add error trapping if vnakit.Init() fails
-
-def plotFile(filePath):
-    """Returns no value
-    Takes the input file from the calling function
-    Uses the input file and configured parameters to graph the contents of
-    the file in the required form
-    """
-
+def plotthings():
+    graphGrid.clear()
+    newYVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 0,0,0]
+    graphFigure.axes[0].plot(xVals, newYVals, 'bx')
+    plotCanvas.draw()
+    #canvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+    #canvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 
 #create root window
 root = Tk()
 root.title("A.R.F. Interface") 
 
 # Create Title frame and populate
-title_frame = ttk.Frame(root)
-title_frame['padding'] = (10, 10)
-title_frame.columnconfigure(2, weight=1)
-
+title_frame = Frame(root)
+title_frame.pack(side = TOP, fill = X)
 logo = PhotoImage(file='radarcs.PNG')
-ttk.Label(title_frame, image = logo, anchor = 'e').grid(column=2, row=0, sticky = (N, S, E, W))
+Label(title_frame, image = logo).pack(side = LEFT, pady = 10, padx = 10)
+Label(title_frame, text = 'A.R.F.', foreground = "#03244d", font = ('TkDefaultFont', 40)).pack(side = LEFT, fill = X)
+portMode = StringVar(title_frame)
+portMode.set(11)
+portModeDropdown = OptionMenu(title_frame, portMode, 11, 12, 21, 22)
+portModeDropdown.config(height = 2, width = 3, font = ('TkDefaultFont', 14))
+portModeDropdown.pack(side = RIGHT, pady = 10, padx = 10)
+Label(title_frame, text = 'Port Mode:', font = ('TkDefaultFont', 20)).pack(side = RIGHT, pady = 10)
 
-#title
-ttk.Label(title_frame, text = 'A.R.F.', foreground = "#03244d", anchor = 'sw', font = ('TkDefaultFont', 40)).grid(column=0, row=0, sticky=(N, S, E, W), pady = 10)
-ttk.Label(title_frame, text = 'v' + VER_NUMBER, foreground = '#dd550c', anchor = 'sw', font = ('TkDefaultFont', 10)).grid(column=1, row=0, sticky = (N, S, E, W), pady = 20)
+# Create graph frame
+graph_frame = Frame(root)
+graph_frame.pack(side = TOP, fill = BOTH, expand = True)
 
-#create button for connecting
-connected = "Not Connected"
-root.connectBtn = Button(root, text = connected, bg = 'red', command = connectButton)
-root.connectBtn.grid(column=0, row=5, sticky = (N,E))
+graphFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="white")
+graphGrid = axes.Axes(graphFigure, [0.1, 0.1, 0.8, 0.8], frameon = True, adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))#, autoscaley_on = True)
+graphGrid.grid(which = 'both')
+graphFigure.add_axes(graphGrid)
+plotCanvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+plotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 
-#create notebook for middle section
-notebook_frame = ttk.Frame(root)
-notebook_frame['padding'] = (10,5)
-notebook_frame.rowconfigure(0, weight = 1)
-notebook_frame.columnconfigure(0, weight = 1)
-notebook = ttk.Notebook(notebook_frame)
-notebook.grid(row=0,column=0,sticky=(N,S,E,W))
+xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
+yVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 3, 6, 9]
+graphFigure.axes[0].plot(xVals, yVals, 'rx')
 
-#frames for notebook tabs
-Config_frame = ttk.Frame(root, padding = (10,5))
-CMD_frame = ttk.Frame(notebook)
-ManualPlt_frame = ttk.Frame(notebook)
-Data_frame = ttk.Frame(notebook)
-Radar_frame = ttk.Frame(notebook)
-notebook.add(Config_frame, text = 'Setup')
-notebook.add(CMD_frame, text = 'Motor Commands')
-notebook.add(ManualPlt_frame, text = 'Manual Plot')
-notebook.add(Data_frame, text = 'Manual Data Gather')
-notebook.add(Radar_frame, text = 'Radar Plots')
 
-#Startup Tab
-#STRT = 
-Startup(Config_frame, 1, 'Setup')
-#Motor Tab
-MOTOR = MotorCont(CMD_frame, 1, 'Motor Command')
-#Plot Tab
-DataPlot(ManualPlt_frame, 1, 'Manual Plot')
-#Data Gather Tab
-DataGather(Data_frame, 1, 'Manual Data')
-#Radar Tab
-RadarPlot(Radar_frame, 1, 'Radar Data')
-#create frames for ADC graphing and csv logging
-Plot_frame = ttk.Frame(root, padding = (10,5))
-Plot_frame.rowconfigure(0, weight = 1)
-Plot_frame.columnconfigure(0, weight = 1)
-LOG_frame = ttk.Frame(root, padding = (10,5))
-LOG_frame.rowconfigure(0, weight = 1)
-LOG_frame.columnconfigure(0, weight = 1)
-pkt_frame = ttk.Frame(root, padding = (10,5))
-LivePlots = LivePlot(Plot_frame, LOG_frame, VER_NUMBER)
 
-#place frames
-title_frame.grid(column=0, row=0, sticky = (N,S,E,W))
-notebook_frame.grid(column=0, row=1, sticky = (N, S, E, W))
-LOG_frame.grid(column=0, row=2, sticky = (N,S,E,W))
-pkt_frame.grid(column=0, row=3, sticky = (N,S,E,W))
-Plot_frame.grid(column=1, row=0, rowspan = 4, sticky = (N,S,E,W))
-root.columnconfigure(0,weight = 0)
-root.rowconfigure(0,weight = 0)
-root.rowconfigure(1, weight = 0)
-root.rowconfigure(2, weight = 0)
-root.rowconfigure(3, weight = 1)
+
+# Create Settings frame
+settings_frame = Frame(graph_frame)
+settings_frame.pack(side = RIGHT, padx = 20, pady = 11, anchor = N)
+Label(settings_frame, text = 'X - Axis Limits ').grid(row = 0, column = 0, pady = 7)
+lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkLowerFrequencyBound)
+lowerXLimit.insert(0, 1000)
+lowerXLimit.grid(row = 0, column = 1, pady = 7)
+Label(settings_frame, text = 'Mhz  to ').grid(row = 0, column = 2, pady = 7)
+upperXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkUpperFrequencyBound)
+upperXLimit.insert(0, 6000)
+upperXLimit.grid(row = 0, column = 3, pady = 7)
+Label(settings_frame, text = 'Mhz').grid(row = 0, column = 4, pady = 7)
+Label(settings_frame, text = 'Number of Frequency points ').grid(row = 1, column = 0, \
+    columnspan = 3, pady = 7, sticky = W)
+numberOfFrequencyPoints = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkFrequencyPoints)
+numberOfFrequencyPoints.insert(0, 500)
+numberOfFrequencyPoints.grid(row = 1, column = 3, pady = 7)
+Label(settings_frame, text = 'Resolution Bandwidth ').grid(row = 2, column = 0, columnspan = 3, \
+    pady = 7, sticky = W)
+resolutionBandwidth = Entry(settings_frame, width = 16, validate = 'focusout', validatecommand = checkResolutionBandwidth)
+resolutionBandwidth.insert(0, 100)
+resolutionBandwidth.xview_scroll(2, UNITS)
+resolutionBandwidth.grid(row = 2, column = 1, columnspan = 3, pady = 7, sticky = E)
+Label(settings_frame, text = 'khz').grid(row = 2, column = 4, pady = 7)
+Label(settings_frame, text='Output Power ').grid(row = 3, column = 0, pady = 7, sticky = W)
+outputPwr = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkOutputPwrBounds)
+outputPwr.insert(0, -3)
+outputPwr.grid(row = 3, column = 1, pady = 7)
+Label(settings_frame, text = 'dbm').grid(row = 3, column = 2, pady = 7, sticky = W)
+#Label(settings_frame, text = 'Transmit Port').grid(row = 4, column = 0, pady = 7, sticky = W)
+#txMode = StringVar(settings_frame)
+#txMode.set(4)
+#txDropdown = OptionMenu(settings_frame, txMode, 1, 2, 3, 4, 5, 6)
+#txDropdown.grid(row = 4, column = 1, pady = 7)
+Label(settings_frame, text = 'Recording Mode ').grid(row = 5, column = 0, pady = 7, sticky = W)
+recordingMode = IntVar()
+Radiobutton(settings_frame, text = '1 Port Mode', variable = recordingMode, \
+    value = vnakit.VNAKIT_MODE_ONE_PORT).grid(row = 6, column = 0, columnspan = 2, sticky = W)
+Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
+    value = vnakit.VNAKIT_MODE_TWO_PORTS).grid(row = 6, column = 1, columnspan = 2)
+
+# Add buttons to the bottom of the GUI
+button_frame = Frame(root, height = 45, pady = 10)
+button_frame.pack(side = BOTTOM, fill = X)
+Button(button_frame, text = 'Program', command = plotthings).place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
+Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)#.grid(row = '0', column = '1')
 
 root.mainloop()
-
-
-   
