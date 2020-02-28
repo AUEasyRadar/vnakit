@@ -7,6 +7,7 @@ import vnakit
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib import figure
 from matplotlib import axes
+from matplotlib.animation import FuncAnimation
 
 #import matplotlib.animation as animation
 #from matplotlib import style
@@ -116,9 +117,24 @@ def checkFrequencyPoints():
         numberOfFrequencyPoints.insert(0, 500)
     return 1
 
-def plotthings():
-    semilogYGrid.clear()
+def initializeSemilogY():
+    """The function used to initialize the semilogY animation."""
+    semilogYData.set_data([], [])
+    return semilogYData,
+def animateSemilogY(i):
+    """The function used by FuncAnimation to plot the animation."""
+    i = i % 60
+    xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
+    y = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 3, 6, 9]
+    for iterate in range(0, len(xVals)):
+        xVals[iterate] = xVals[iterate] + i * 100
+    semilogYData.set_data(xVals, y)
+    return semilogYData,
+
+def programVNA():
+    semilogYAxes.clear()
     newYVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 0,0,0]
+    xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
     semilogYFigure.axes[0].plot(xVals, newYVals, 'bx')
     semilogYPlotCanvas.draw()
     #canvas = FigureCanvasTkAgg(semilogYFigure, master = semilogY_frame)
@@ -133,13 +149,16 @@ title_frame = Frame(root)
 title_frame.pack(side = TOP, fill = X)
 logo = PhotoImage(file='radarcs.PNG')
 Label(title_frame, image = logo).pack(side = LEFT, pady = 10, padx = 10)
-Label(title_frame, text = 'A.R.F.', foreground = "#03244d", font = ('TkDefaultFont', 40)).pack(side = LEFT, fill = X)
+Label(title_frame, text = 'A.R.F.', foreground = "#03244d", \
+    font = ('TkDefaultFont', 40)).pack(side = LEFT, fill = X)
 portMode = StringVar(title_frame)
 portMode.set('Gamma')
-portModeDropdown = OptionMenu(title_frame, portMode, 'Tau', 'Gamma', 'S11', 'S21', 'IL', 'RL', 'VSWR')
+portModeDropdown = OptionMenu(title_frame, portMode, 'Tau', 'Gamma', 'S11', \
+     'S21', 'IL', 'RL', 'VSWR')
 portModeDropdown.config(height = 2, width = 6, font = ('TkDefaultFont', 14))
 portModeDropdown.pack(side = RIGHT, pady = 10, padx = 10)
-Label(title_frame, text = 'Port Mode:', font = ('TkDefaultFont', 20)).pack(side = RIGHT, pady = 10)
+Label(title_frame, text = 'Port Mode:', font = \
+    ('TkDefaultFont', 20)).pack(side = RIGHT, pady = 10)
 
 #Create notebook
 notebook = ttk.Notebook(root)
@@ -150,41 +169,52 @@ ttk.Style().configure('TNotebook.Tab', background = '#F0F0F0')
 semilogY_frame = Frame(notebook, bg = '#F0F0F0', pady = 10, padx = 10)
 semilogY_frame.pack(side = TOP, fill = BOTH, expand = True)
 semilogYFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="#F0F0F0")
-semilogYGrid = axes.Axes(semilogYFigure, [0.1, 0.1, 0.8, 0.85], frameon = True, adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))#, autoscaley_on = True)
-semilogYGrid.grid(which = 'both')
-semilogYFigure.add_axes(semilogYGrid)
+semilogYAxes = axes.Axes(semilogYFigure, [0.1, 0.1, 0.8, 0.85], frameon = True, \
+    adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, \
+        xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))
+semilogYAxes.grid(which = 'both')
+semilogYFigure.add_axes(semilogYAxes)
 semilogYPlotCanvas = FigureCanvasTkAgg(semilogYFigure, master = semilogY_frame)
 semilogYPlotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
-xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
-yVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 3, 6, 9]
-semilogYFigure.axes[0].plot(xVals, yVals, 'rx')
+semilogYData, = semilogYFigure.axes[0].plot([], [], 'rx')
+
+semilogYAnimation = FuncAnimation(semilogYFigure, animateSemilogY, \
+    init_func=initializeSemilogY, frames = 600, interval = 200, blit = True)
+
+
 
 # Create Settings frame
 settings_frame = Frame(semilogY_frame)
 settings_frame.pack(side = RIGHT, padx = 20, pady = 11, anchor = N)
 Label(settings_frame, text = 'X - Axis Limits ').grid(row = 0, column = 0, pady = 7)
-lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkLowerFrequencyBound)
+lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', \
+    validatecommand = checkLowerFrequencyBound)
 lowerXLimit.insert(0, 1000)
 lowerXLimit.grid(row = 0, column = 1, pady = 7)
 Label(settings_frame, text = 'Mhz  to ').grid(row = 0, column = 2, pady = 7)
-upperXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkUpperFrequencyBound)
+upperXLimit = Entry(settings_frame, width = 5, validate = 'focusout', \
+    validatecommand = checkUpperFrequencyBound)
 upperXLimit.insert(0, 6000)
 upperXLimit.grid(row = 0, column = 3, pady = 7)
 Label(settings_frame, text = 'Mhz').grid(row = 0, column = 4, pady = 7)
 Label(settings_frame, text = 'Number of Frequency points ').grid(row = 1, column = 0, \
     columnspan = 3, pady = 7, sticky = W)
-numberOfFrequencyPoints = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkFrequencyPoints)
+numberOfFrequencyPoints = Entry(settings_frame, width = 5, \
+    validate = 'focusout', validatecommand = checkFrequencyPoints)
 numberOfFrequencyPoints.insert(0, 500)
 numberOfFrequencyPoints.grid(row = 1, column = 3, pady = 7)
-Label(settings_frame, text = 'Resolution Bandwidth ').grid(row = 2, column = 0, columnspan = 3, \
-    pady = 7, sticky = W)
-resolutionBandwidth = Entry(settings_frame, width = 16, validate = 'focusout', validatecommand = checkResolutionBandwidth)
+Label(settings_frame, text = 'Resolution Bandwidth ').grid(row = 2, column = 0, \
+    columnspan = 3, pady = 7, sticky = W)
+resolutionBandwidth = Entry(settings_frame, width = 16, \
+    validate = 'focusout', validatecommand = checkResolutionBandwidth)
 resolutionBandwidth.insert(0, 100)
 resolutionBandwidth.xview_scroll(2, UNITS)
 resolutionBandwidth.grid(row = 2, column = 1, columnspan = 3, pady = 7, sticky = E)
 Label(settings_frame, text = 'khz').grid(row = 2, column = 4, pady = 7)
-Label(settings_frame, text='Output Power ').grid(row = 3, column = 0, pady = 7, sticky = W)
-outputPwr = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkOutputPwrBounds)
+Label(settings_frame, text='Output Power ').grid(row = 3, column = 0, \
+    pady = 7, sticky = W)
+outputPwr = Entry(settings_frame, width = 5, \
+    validate = 'focusout', validatecommand = checkOutputPwrBounds)
 outputPwr.insert(0, -3)
 outputPwr.grid(row = 3, column = 1, pady = 7)
 Label(settings_frame, text = 'dbm').grid(row = 3, column = 2, pady = 7, sticky = W)
@@ -193,35 +223,33 @@ Label(settings_frame, text = 'dbm').grid(row = 3, column = 2, pady = 7, sticky =
 #txMode.set(4)
 #txDropdown = OptionMenu(settings_frame, txMode, 1, 2, 3, 4, 5, 6)
 #txDropdown.grid(row = 4, column = 1, pady = 7)
-Label(settings_frame, text = 'Recording Mode ').grid(row = 5, column = 0, pady = 7, sticky = W)
+Label(settings_frame, text = 'Recording Mode ').grid(row = 5, column = 0, \
+    pady = 7, sticky = W)
 recordingMode = IntVar()
 Radiobutton(settings_frame, text = '1 Port Mode', variable = recordingMode, \
-    value = vnakit.VNAKIT_MODE_ONE_PORT).grid(row = 6, column = 0, columnspan = 2, sticky = W)
+    value = vnakit.VNAKIT_MODE_ONE_PORT).grid(row = 6, column = 0, \
+        columnspan = 2, sticky = W)
 Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
     value = vnakit.VNAKIT_MODE_TWO_PORTS).grid(row = 6, column = 1, columnspan = 2)
 notebook.add(semilogY_frame, text='SemilogY')
 
 #Polar Plot
 polar_frame = Frame(notebook, bg = '#F0F0F0', pady = 10, padx = 10)
-polar_frame.pack(side = TOP, fill = BOTH, expand = True)
+polar_frame.pack(side = LEFT, fill = BOTH, expand = True)
 polarFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="#F0F0F0")
-#polarGrid = axes.Axes(polarFigure, [0.1, 0.1, 0.8, 0.85], frameon = True, adjustable = 'box', in_layout = True)#, autoscaley_on = True)
-#polarGrid.grid(which = 'both')
-polarFigure.add_axes([0.1, 0.1, 0.8, 0.85], projection = 'polar')
+polarFigure.add_axes([0.1, 0.15, 0.7, 0.7], projection = 'polar')
 polarPlotCanvas = FigureCanvasTkAgg(polarFigure, master = polar_frame)
 polarPlotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 notebook.add(polar_frame, text='Polar')
-
-
-notebook.pack(side = TOP, fill = BOTH, expand = True)
+notebook.pack(side = TOP, fill = BOTH, expand = True, padx = 11)
 
 
 
 # Add buttons to the bottom of the GUI
 button_frame = Frame(root, height = 45, pady = 10)
 button_frame.pack(side = BOTTOM, fill = X)
-Button(button_frame, text = 'Program', command = plotthings).place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
-Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)#.grid(row = '0', column = '1')
+Button(button_frame, text = 'Program', command = programVNA).place(relx = 0.3, y = -5)
+Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)
 
 
 
