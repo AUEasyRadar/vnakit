@@ -1,5 +1,5 @@
 from tkinter import *
-#from tkinter import ttk 
+from tkinter import ttk 
 import vnakit
 #from vnakit_ex import getSettingsStr
 #import matplotlib.backends.tkagg as FigureCanvasTkAgg
@@ -117,11 +117,11 @@ def checkFrequencyPoints():
     return 1
 
 def plotthings():
-    graphGrid.clear()
+    semilogYGrid.clear()
     newYVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 0,0,0]
-    graphFigure.axes[0].plot(xVals, newYVals, 'bx')
-    plotCanvas.draw()
-    #canvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
+    semilogYFigure.axes[0].plot(xVals, newYVals, 'bx')
+    semilogYPlotCanvas.draw()
+    #canvas = FigureCanvasTkAgg(semilogYFigure, master = semilogY_frame)
     #canvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 
 #create root window
@@ -135,32 +135,32 @@ logo = PhotoImage(file='radarcs.PNG')
 Label(title_frame, image = logo).pack(side = LEFT, pady = 10, padx = 10)
 Label(title_frame, text = 'A.R.F.', foreground = "#03244d", font = ('TkDefaultFont', 40)).pack(side = LEFT, fill = X)
 portMode = StringVar(title_frame)
-portMode.set(11)
-portModeDropdown = OptionMenu(title_frame, portMode, 11, 12, 21, 22)
-portModeDropdown.config(height = 2, width = 3, font = ('TkDefaultFont', 14))
+portMode.set('Gamma')
+portModeDropdown = OptionMenu(title_frame, portMode, 'Tau', 'Gamma', 'S11', 'S21', 'IL', 'RL', 'VSWR')
+portModeDropdown.config(height = 2, width = 6, font = ('TkDefaultFont', 14))
 portModeDropdown.pack(side = RIGHT, pady = 10, padx = 10)
 Label(title_frame, text = 'Port Mode:', font = ('TkDefaultFont', 20)).pack(side = RIGHT, pady = 10)
 
-# Create graph frame
-graph_frame = Frame(root)
-graph_frame.pack(side = TOP, fill = BOTH, expand = True)
+#Create notebook
+notebook = ttk.Notebook(root)
+ttk.Style().configure('TNotebook.Tab', background = '#F0F0F0')
 
-graphFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="white")
-graphGrid = axes.Axes(graphFigure, [0.1, 0.1, 0.8, 0.8], frameon = True, adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))#, autoscaley_on = True)
-graphGrid.grid(which = 'both')
-graphFigure.add_axes(graphGrid)
-plotCanvas = FigureCanvasTkAgg(graphFigure, master = graph_frame)
-plotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 
+# Create semilogY frame
+semilogY_frame = Frame(notebook, bg = '#F0F0F0', pady = 10, padx = 10)
+semilogY_frame.pack(side = TOP, fill = BOTH, expand = True)
+semilogYFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="#F0F0F0")
+semilogYGrid = axes.Axes(semilogYFigure, [0.1, 0.1, 0.8, 0.85], frameon = True, adjustable = 'box', in_layout = True, xscale = 'linear', autoscalex_on = True, xlabel = 'frequency', xlim = (1000, 6000), yscale = 'symlog', ylim = (-90, 100))#, autoscaley_on = True)
+semilogYGrid.grid(which = 'both')
+semilogYFigure.add_axes(semilogYGrid)
+semilogYPlotCanvas = FigureCanvasTkAgg(semilogYFigure, master = semilogY_frame)
+semilogYPlotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
 xVals = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000]
 yVals = [-90, -80, -70, -60, -50, -40, -30, -20, -10, -5, 0, 3, 6, 9]
-graphFigure.axes[0].plot(xVals, yVals, 'rx')
-
-
-
+semilogYFigure.axes[0].plot(xVals, yVals, 'rx')
 
 # Create Settings frame
-settings_frame = Frame(graph_frame)
+settings_frame = Frame(semilogY_frame)
 settings_frame.pack(side = RIGHT, padx = 20, pady = 11, anchor = N)
 Label(settings_frame, text = 'X - Axis Limits ').grid(row = 0, column = 0, pady = 7)
 lowerXLimit = Entry(settings_frame, width = 5, validate = 'focusout', validatecommand = checkLowerFrequencyBound)
@@ -199,11 +199,30 @@ Radiobutton(settings_frame, text = '1 Port Mode', variable = recordingMode, \
     value = vnakit.VNAKIT_MODE_ONE_PORT).grid(row = 6, column = 0, columnspan = 2, sticky = W)
 Radiobutton(settings_frame, text = '2 Port Mode', variable = recordingMode, \
     value = vnakit.VNAKIT_MODE_TWO_PORTS).grid(row = 6, column = 1, columnspan = 2)
+notebook.add(semilogY_frame, text='SemilogY')
+
+#Polar Plot
+polar_frame = Frame(notebook, bg = '#F0F0F0', pady = 10, padx = 10)
+polar_frame.pack(side = TOP, fill = BOTH, expand = True)
+polarFigure = figure.Figure(figsize=(4,2), dpi=100, facecolor="#F0F0F0")
+#polarGrid = axes.Axes(polarFigure, [0.1, 0.1, 0.8, 0.85], frameon = True, adjustable = 'box', in_layout = True)#, autoscaley_on = True)
+#polarGrid.grid(which = 'both')
+polarFigure.add_axes([0.1, 0.1, 0.8, 0.85], projection = 'polar')
+polarPlotCanvas = FigureCanvasTkAgg(polarFigure, master = polar_frame)
+polarPlotCanvas.get_tk_widget().pack(side=LEFT, fill=BOTH, expand=True)
+notebook.add(polar_frame, text='Polar')
+
+
+notebook.pack(side = TOP, fill = BOTH, expand = True)
+
+
 
 # Add buttons to the bottom of the GUI
 button_frame = Frame(root, height = 45, pady = 10)
 button_frame.pack(side = BOTTOM, fill = X)
 Button(button_frame, text = 'Program', command = plotthings).place(relx = 0.3, y = -5)#.grid(row = '0', column = '0')
 Button(button_frame, text = 'Begin Run').place(relx = 0.7, y = -5)#.grid(row = '0', column = '1')
+
+
 
 root.mainloop()
